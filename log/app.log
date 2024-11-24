@@ -1,0 +1,31 @@
+{"L":"INFO","T":"2024-11-24T20:22:08.775+0700","M":"Server started on port 8080"}
+{"L":"DEBUG","T":"2024-11-24T20:22:14.364+0700","M":"database","query":"WITH photos AS (\n\t\t\t\t\tSELECT product_photos.product_id, product_photos.photo_url\n\t\t\t\t\tFROM product_photos\n\t\t\t\t\tORDER BY product_photos.id\n\t\t\t\t), variants AS (\n\t\t\t\t    SELECT product_variants.product_id, product_variants.name AS variant_name\n\t\t\t\t\tFROM product_variants\n\t\t\t\t\tORDER BY product_variants.id\n\t\t\t\t)\n\t\t\t\tSELECT id,name, thumbnail, category_id, rating, price, discount_rate, price-(price*discount_rate/100),\n\t\t\t\tw.product_id IS NOT NULL, created_at, now()::date-created_at::date<=30,\n\t\t\t\t(SELECT string_agg(photo_url, ',') FROM photos WHERE photos.product_id=products.id),\n\t\t\t\t(SELECT string_agg(variant_name, ',') FROM variants WHERE variants.product_id=products.id)\n\t\t\t\tFROM products\n\t\t\t\tLEFT JOIN average_product_reviews ON average_product_reviews.product_id = products.id\n\t\t\t\tLEFT JOIN (SELECT product_id FROM wishlist_tokens WHERE wishlist_tokens.token=$2) w \n\t\t\t\tON products.id=w.product_id WHERE id=$1"}
+{"L":"INFO","T":"2024-11-24T20:22:14.432+0700","M":"http request","method":"GET","url":"/api/products/1","duration":"67.741083ms"}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.756+0700","M":"validate input","data":{"name":"Customer Satu","username":"customer1@mail.com","password":"password","created_at":"0001-01-01T00:00:00Z"}}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.758+0700","M":"validate :: unique","tableName":"users","columnName":"username","value":"customer1@mail.com"}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.758+0700","M":"database","query":"SELECT NOT EXISTS(SELECT 1 FROM users WHERE username = customer1@mail.com)"}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.828+0700","M":"database","query":"BEGIN"}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.828+0700","M":"database","query":"INSERT INTO users (username, password) VALUES(customer1@mail.com, password) RETURNING id, created_at, ''"}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.857+0700","M":"database","query":"INSERT INTO customers (user_id, name) VALUES(6, Customer Satu)"}
+{"L":"DEBUG","T":"2024-11-24T23:16:09.861+0700","M":"database","query":"COMMIT"}
+{"L":"INFO","T":"2024-11-24T23:16:09.861+0700","M":"http request","method":"POST","url":"/api/register","duration":"108.745375ms"}
+{"L":"DEBUG","T":"2024-11-24T23:28:42.041+0700","M":"validate input","data":{"name":"Customer Satu","username":"customer1@mail.com","password":"password","created_at":"0001-01-01T00:00:00Z"}}
+{"L":"DEBUG","T":"2024-11-24T23:28:42.042+0700","M":"validate :: unique","tableName":"users","columnName":"username","value":"customer1@mail.com"}
+{"L":"DEBUG","T":"2024-11-24T23:28:42.043+0700","M":"database","query":"SELECT NOT EXISTS(SELECT 1 FROM users WHERE username = customer1@mail.com)"}
+{"L":"INFO","T":"2024-11-24T23:28:42.065+0700","M":"http request","method":"POST","url":"/api/register","duration":"24.979583ms"}
+{"L":"DEBUG","T":"2024-11-24T23:29:41.158+0700","M":"validate input","data":{"name":"","username":"customer1@mail.com","password":"password","created_at":"0001-01-01T00:00:00Z"}}
+{"L":"DEBUG","T":"2024-11-24T23:29:41.159+0700","M":"validate :: unique","tableName":"users","columnName":"username","value":"customer1@mail.com"}
+{"L":"DEBUG","T":"2024-11-24T23:29:41.159+0700","M":"database","query":"SELECT NOT EXISTS(SELECT 1 FROM users WHERE username = customer1@mail.com)"}
+{"L":"INFO","T":"2024-11-24T23:29:41.162+0700","M":"http request","method":"POST","url":"/api/register","duration":"4.462292ms"}
+{"L":"DEBUG","T":"2024-11-24T23:34:41.188+0700","M":"database","query":"INSERT INTO sessions (user_id, expired_at)\n    \t\t\t    SELECT id, now() + make_interval(mins => $3)\n    \t\t\t    FROM users WHERE username=customer1@mail.com AND password=password\n    \t\t\t    RETURNING token, expired_at"}
+{"L":"INFO","T":"2024-11-24T23:34:41.230+0700","M":"authentication success","username":"customer1@mail.com"}
+{"L":"INFO","T":"2024-11-24T23:34:41.234+0700","M":"http request","method":"POST","url":"/api/login","duration":"49.22975ms"}
+{"L":"DEBUG","T":"2024-11-24T23:37:27.355+0700","M":"database","query":"INSERT INTO sessions (user_id, expired_at)\n    \t\t\t    SELECT id, now() + make_interval(mins => $3)\n    \t\t\t    FROM users WHERE username=customer1@mail.com AND password=passwor\n    \t\t\t    RETURNING token, expired_at"}
+{"L":"ERROR","T":"2024-11-24T23:37:27.392+0700","M":"database query","error":"sql: no rows in result set"}
+{"L":"INFO","T":"2024-11-24T23:37:27.394+0700","M":"http request","method":"POST","url":"/api/login","duration":"41.603ms"}
+{"L":"DEBUG","T":"2024-11-24T23:43:26.691+0700","M":"database","query":"SELECT photo, title, subtitle, path_page FROM banners WHERE started_at <= now() AND finished_at >= now()"}
+{"L":"INFO","T":"2024-11-24T23:43:26.725+0700","M":"http request","method":"GET","url":"/api/banners","duration":"36.361416ms"}
+{"L":"DEBUG","T":"2024-11-24T23:45:27.628+0700","M":"database","query":"SELECT id,name,category_id FROM products WHERE products.id IN\n\t\t\t\t (SELECT DISTINCT product_id\n\t\t\t\t\tFROM order_items\n\t\t\t\t\tJOIN orders ON order_items.order_id=orders.id\n\t\t\t\t\tWHERE now()-orders.created_at <= interval '1 month')\n\t\t\t\t   LIMIT $2 OFFSET $1"}
+{"L":"INFO","T":"2024-11-24T23:45:27.640+0700","M":"http request","method":"GET","url":"/api/best-sellers","duration":"71.4565ms"}
+{"L":"DEBUG","T":"2024-11-24T23:48:03.391+0700","M":"database","query":"SELECT id,name FROM categories"}
+{"L":"INFO","T":"2024-11-24T23:48:03.426+0700","M":"http request","method":"GET","url":"/api/categories","duration":"37.429833ms"}
