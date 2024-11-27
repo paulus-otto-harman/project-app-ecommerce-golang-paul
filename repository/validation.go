@@ -56,8 +56,8 @@ func (repo *Validation) NotEmptyCart(authToken string) (bool, error) {
 	query := `SELECT EXISTS(
 				SELECT cart_items.product_id
 				FROM cart_items
-				JOIN (SELECT id FROM shopping_session_tokens WHERE token=$1) shopping_session
-				ON cart_items.shopping_session_id=shopping_session.id)`
+				JOIN (SELECT shopping_session_id FROM shopping_session_tokens WHERE token=$1) shopping_session
+				ON cart_items.shopping_session_id=shopping_session.shopping_session_id)`
 	var found bool
 	if err := repo.Db.QueryRow(query, authToken).Scan(&found); err != nil {
 		return false, err

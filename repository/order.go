@@ -27,10 +27,10 @@ func (repo *Order) Create(order *domain.Order) error {
 					SELECT customer_id, $2, $3, $4, $5, $6
 					    FROM customer_tokens
 						WHERE customer_tokens.token=$1
-					RETURNING orders.id
+					RETURNING orders.id, created_at
 				`
 
-	err = repo.Db.QueryRow(queryOrder, order.CustomerToken, order.AddressId, order.CouponCode, order.Shipping, order.Notes, order.PaymentMethod).Scan(&order.Id)
+	err = repo.Db.QueryRow(queryOrder, order.CustomerToken, order.AddressId, order.CouponCode, order.Shipping, order.Notes, order.PaymentMethod).Scan(&order.Id, &order.CreatedAt)
 	if err != nil {
 		return err
 	}
